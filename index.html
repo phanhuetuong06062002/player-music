@@ -76,6 +76,7 @@
       const $$ = document.querySelectorAll.bind(document);
       const playlist = $('.playlist');
       const cd = $('.cd');
+      const PLAYER_STORAGE_KEY = 'F8_PLAYER';
       const heading = $('header h2');
       const cdThumb = $('.cd-thumb');
       const audio = $('#audio');
@@ -143,6 +144,11 @@
         isRandom: false,
         isRepeat: false,
         currentIndex: 0,
+        config : JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
+        setConfig: function(key,value){
+          this.config[key] = value;
+          localStorage.setItem(PLAYER_STORAGE_KEY,JSON.stringify(this.config));
+        },
         render: function () {
           const htmls = this.songs.map((song,index) => {
             return `<div class= 'song ${index === this.currentIndex ? 'active' :''}' data-index=${index} '>
@@ -244,13 +250,15 @@
           }
           //Xử lý khi bật/tắt random
           randomBtn.onclick = function () {
-            _this.isRandom = !_this.isRandom
+            _this.isRandom = !_this.isRandom;
+            _this.setConfig('isRandom',_this.isRandom);
             randomBtn.classList.toggle('active',_this.isRandom);
             _this.render();
           }
           //Xử lý khi repeat
           repeatBtn.onclick = function () {
-            _this.isReapeat = !_this.isReapeat
+            _this.isRepeat = !_this.isRepeat;
+            _this.setConfig('isRepeat', _this.isRepeat);
             repeatBtn.classList.toggle('active',_this.isReapeat);
             _this.render();
           }
@@ -288,6 +296,10 @@
           audio.src = this.currentSong.path;
           // console.log(heading,cdThumb,[audio]);
         },
+        loadConfig: function () {
+          this.isRandom = this.config.isRandom;
+          this.isRepeat = this.config.isRepeat;
+        },
         nextSong : function () {
           this.currentIndex++;
           if(this.currentIndex >= this.songs.length){
@@ -312,6 +324,8 @@
           this.loadCurrentSong();
         },
         start: function () {
+          //Gán cấu hình config vào ứng dụng
+          this.loadConfig();
           //Định nghĩa property cho object
           this.defineProperties();
           //Lắng nghe/sử lý các sự kiện DOM
@@ -319,9 +333,12 @@
           //load thông tin bài hát lên UI
           this.loadCurrentSong();
           //Play random song
-          //this.playRandomSong();
+          this.playRandomSong();
           //Render playlist
           this.render();
+          //Hiển thị trạng thái ban đầu của button repeat & random
+          randomBtn.classList.toggle('active',this.isRandom);
+          repeatBtn.classList.toggle('active',this.isrepeat);
         },
         
       }
