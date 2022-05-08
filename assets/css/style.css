@@ -158,7 +158,7 @@
   .song.active .option,
   .song.active .author,
   .song.active .title {
-    color: #fff;
+    color: orange;
   }
   
   .song .thumb {
